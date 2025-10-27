@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
-import { auth } from '../firebase/config';
+import { auth, db } from '../firebase/config'; 
 
 class Register extends Component {
 
@@ -14,18 +14,30 @@ class Register extends Component {
   }
 
     onSubmit() {
-        const { email, username, password } = this.state;
-        console.log('Datos de registro:', { email, username, password });
+      const { email, username, password } = this.state;
+      console.log('Datos de registro:', { email, username, password });
 
-        auth
-          .createUserWithEmailAndPassword(email, password)
-          .then(() => {
-            this.props.navigation.navigate('Login'); //para redirigir a login
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+      auth
+        .createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          
+          db.collection('users').add({
+              email: auth.currentUser.email,
+              username: username,
+              createdAt: Date.now(),
+            })
+            .then(() => {
+              this.props.navigation.navigate('Login');
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
+
 
 
     render() {
@@ -114,3 +126,4 @@ field: {
 });
 
 export default Register;
+
